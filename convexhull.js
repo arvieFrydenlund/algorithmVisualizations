@@ -1,3 +1,12 @@
+/*Code by Arvie Frydenlund, April 2nd 2012
+ *
+ *The visualization works by creating a list of frames.
+ *Each frame repersents what the algorithm looks like at a particular time.
+ *The the animation can just move though this list and draw each frame when it 
+ *comes time to do so. 
+ *
+ */
+
 //The function called on load.
 function start(){
     //set up buttons
@@ -38,15 +47,16 @@ function start(){
         var mousePos = getMousePos(canvas, evt);	
         if(running == false){
             points.push(mousePos);
-            drawPoint( mousePos);
-        }	
-    //debug.innerHTML = points.length+" ("+points[0].x+","+points[0].y+")";		
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            drawPoints();
+        }			
     }, false);
 	
 
 
 };
 
+//resets variables
 function myClear(){
     clearTimeout(timeOutID);
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -63,24 +73,19 @@ function myClear(){
     points = [];
     upper = []; //stores points in upper portion of conhull
     lower = []; //stores points in lower portion of conhull
-
     //holds the frames which define what the algorithm looks like at each step
     frames = [];
     //holds the current frame
     curFrame = 0;
-    
-    time = 700; //time step
-  
     // holds the setTimeOut ID
     timeOutID = 0;
-
     //used for when user input stops and algorithm runs.  This disables new points.
     running = false;
-    
     //determines if we are in a paused or running state
     paused = true;
 }
 
+//draws the given point on the screen
 function drawPoint( mousePos){
     context.beginPath(); 
     context.arc(mousePos.x, mousePos.y, 4, 0, 2 * Math.PI, true); 
@@ -88,6 +93,7 @@ function drawPoint( mousePos){
 }
 
 
+//code taken from http://www.html5canvastutorials.com/advanced/html5-canvas-mouse-coordinates/
 function getMousePos(canvas, evt){
     // get canvas position
     var obj = canvas;
@@ -111,6 +117,15 @@ function getMousePos(canvas, evt){
 
 //runs conhull for the first time
 function runHull(){
+    if(points.length < 4){  //safety case
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.font = '18pt Calibri';
+        context.fillStyle = 'black';
+        context.fillText("Need 4 or more points for the algorithm to be intresting!", 10, 25);
+        drawPoints();
+        return;
+    }
+    
     document.getElementById("controls").style.display = "inline";
     document.getElementById("runhull").style.display = "none";
     running = true;
@@ -271,6 +286,7 @@ function reset(){
     curFrame = 0;   
 }
 
+//recurence funtion for animating frames
 function playRun(){
     drawCurFrame();
     if(curFrame < frames.length && curFrame != 0){
@@ -299,7 +315,7 @@ function drawLast(){
     context.moveTo(frames[frames.length-1].upper[upper.length-1].x, frames[frames.length-1].upper[upper.length-1].y);
     context.lineTo(frames[frames.length-1].lower[0].x, frames[frames.length-1].lower[0].y); 
     context.stroke();
-    //redram frame so it looks nice
+    //redraw frame so it looks nice
     drawLines(frames[frames.length-1].upper, false);
     colourPoints(frames[frames.length-1].upper, true);
     drawLines(frames[frames.length-1].lower, false);

@@ -1,0 +1,80 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Convex Hull</title>
+<script type="text/javascript" src ="convexhull.js"></script>
+<style type="text/css">
+    #alg{
+        margin-left: 10px;
+    }
+    #canvas{
+        float: left;
+        margin-right: 30px;
+    }
+    .pauseplay{
+       
+    }
+</style>
+</head>
+<body onload="start();">
+    <h1>Convex Hull Visualization</h1>
+    <hr>
+    <div>
+        <canvas id="canvas" width="600" height="600">Sorry no HTML5</canvas>
+        <div id="alg">
+            <small>A convex hull of a set of points <b>P</b>, <b>CH</b>(<b>P</b>), is the intersection of all convex sets containing <b>P</b>.</small>
+            <pre>
+            <code>
+    Input: A set <b>P</b> of <b>n</b> points in the plain
+    Output: A list of vertices of <b>CH</b>(<b>P</b>) in clockwise order
+                    
+    1.  <font COLOR="orange">Sort</font> P by x-coord using a lexographic ordering
+    2.  Put <b>p<sub>1</sub></b> then <b>p<sub>2</sub></b> into a list <font COLOR="red">upperHull</font>
+    3.  for <b>i</b> = 3 to <b>n</b>
+    4.     Push <b>p<sub>i</sub></b> to <font COLOR="red">upperHull</font>
+    5.     while <font COLOR="red">upperHull</font> contains more than two points and 
+           the last three points in <font COLOR="red">upperHull</font> <font COLOR="orange">do not make a right hand turn</font>
+    6.        Delete the middle of the three points from <font COLOR="red">upperHull</font>
+                
+    7.  Put <b>p<sub>n</sub></b> then <b>p<sub>n-1</sub></b> into a list <font COLOR="green">lowerHull</font>
+    8.  for <b>i</b> = <b>n-2</b> to 1
+    9.     Push <b>p<sub>i</sub></b> to <font COLOR="green">lowerHull</font>
+    10.    while <font COLOR="green">lowerHull</font> contains more than two points and 
+           the last three points in <font COLOR="green">lowerHull</font> <font COLOR="orange">do not make a right hand turn</font>
+    11.       Delete the middle of the three points from <font COLOR="green">lowerHull</font>
+                
+    12. Remove the first and last points of <font COLOR="green">lowerHull</font>
+    13. Return a list of the <font COLOR="green">lowerHull</font> appended to <font COLOR="red">upperHull</font>
+                
+    Where we can determine a right hand turn by taking the cross product of
+    the vectors formed from the three points as in the following function:
+                
+    Input:  Three points in a given order
+    Output:  > 0 if they do not make a right hand turn, 0 if they are co-linear,
+             and < 0 if they do make a right hand turn.
+                
+    1.  <font COLOR="orange">notRightHandTurn</font>(<b>p<sub>1</sub></b>, <b>p<sub>2</sub></b>, <b>p<sub>3</sub></b>)
+    2.     Return (<b>p<sub>2</sub>.x</b> - <b>p<sub>1</sub>.x</b>)*(<b>p<sub>3</sub>.y</b> - <b>p<sub>1</sub>.y</b>) - (<b>p<sub>2</sub>.y</b> - <b>p<sub>1</sub>.y</b>)*(<b>p<sub>3</sub>.x</b> - <b>p<sub>1</sub>.x</b>)
+            </code>            
+            </pre>
+            <small>The running time is O(nlogn).</small>
+        </div>       
+    </div>
+    <br clear="all">
+    <input type="button" onclick="myClear();" value="Clear">
+    <input type="button" id="runhull" onclick="runHull();" value="Run">
+    <div id="controls"> 
+        <input type="button" class="pauseplay" id="play" onclick="play();" value="Play">
+        <input type="button" class="pauseplay" id="pause" onclick="pause();" value="Pause">
+        
+        <input type="button" class="backfor" id="backward" onclick="backward();" value=&larr;>
+        <input type="button" class="backfor" id="forward" onclick="forward();" value=&rarr;>
+    </div>
+        
+    <hr>
+   <small> Algorithm Source - Computational Geometry: Algorithms and Applications, Third Edition, Mark de Berg et al.</small>
+
+</body>
+</html>

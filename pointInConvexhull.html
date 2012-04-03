@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Finding a Point in a Convex Hull Visualization</title>
+<script type="text/javascript" src ="pointInConvexhull.js"></script>
+<style type="text/css">
+    #alg{
+        margin-left: 10px;
+    }
+    #canvas{
+        float: left;
+        margin-right: 30px;
+    }
+
+</style>
+</head>
+<body onload="start();">
+    <h1>Determine if a Point Lies Inside a Convex Polygon Visualization</h1>
+    <hr>
+    <div>
+        <canvas id="canvas" width="600" height="600">Sorry no HTML5</canvas>
+        <div id="alg">
+<pre>
+<code>
+    Input: A convex polygon <b>CP</b> of length <b>n</b> ordered clockwise, a point <font COLOR="red">p</font>
+    Output: True if the <font COLOR="red">p</font> lies in <b>CP</b>, false otherwise
+    
+    1.  <font COLOR="orange">insideCP</font>(<b>CP</b>, <font COLOR="red">p</font>)
+    2.      if(|<b>CP</b>| == 3)
+    3.          Return if <font COLOR="red">p</font> <font COLOR="orange">lies inside the triangle</font> <b>CP</b>
+    4.      <font COLOR="blue">mid</font>=|<b>CP</b>|/2
+    5.      if <font COLOR="red">p</font> <font COLOR="orange">lies on</font> the <font COLOR="blue">line segment</font> from <b>CP</b>[0] to <b>CP</b>[<font COLOR="blue">mid</font>] 
+    6.          Return true
+    7.      if <font COLOR="red">p</font> <font COLOR="orange">lies to the left</font> of the <font COLOR="blue">line segment</font>
+    8.          <b>CP<sub>l</sub></b> = <b>CP</b>[0] to <b>CP</b>[<font COLOR="blue">mid</font>]
+    9.          Return <font COLOR="orange">insideCP</font>(<b>CP<sub>l</sub></b>, <font COLOR="red">p</font>)
+    10.     else
+    11.         <b>CP<sub>r</sub></b> = <b>CP</b>[0] concatenated with <b>CP</b>[<font COLOR="blue">mid</font>] to <b>CP</b>[<b>n</b>]
+    12.         Return <font COLOR="orange">insideCP</font>(<b>CP<sub>r</sub></b>, <font COLOR="red">p</font>)
+    
+    Where we can determine if a point lies on or to the left of a line using the 
+    cross product formed from the line and the point as in the below function:
+    
+    Input:  A line made up of <font COLOR="blue">p<sub>1</sub></font> and <font COLOR="blue">p<sub>2</sub></font> and a point <font COLOR="red">p</font>
+    Output: > 0 the point lies to the left, 0 if on the line, and < 0 otherwise
+                
+    1.  <font COLOR="orange">crossProduct</font>(<font COLOR="blue">p<sub>1</sub></font>, <font COLOR="blue">p<sub>2</sub></font>, <font COLOR="red">p</font>)
+    2.     Return (<font COLOR="red">p</font>.x - <font COLOR="blue">p<sub>1</sub></font>.x)*(<font COLOR="blue">p<sub>2</sub></font>.y - <font COLOR="blue">p<sub>1</sub></font>.y) - (<font COLOR="red">p</font>.y - <font COLOR="blue">p<sub>1</sub></font>.y)*(<font COLOR="blue">p<sub>2</sub></font>.x - <font COLOR="blue">p<sub>1</sub></font>.x)
+    
+    Input: An array <b>A</b> of 3 points and a point <font COLOR="red">p</font>
+    Output: True if <font COLOR="red">p</font> lies in the triangle, false otherwise
+    
+    1. <font COLOR="orange">insideTriangle</font>(<b>A</b>, <font COLOR="red">p</font>)
+    2.      c1 = <font COLOR="orange">crossProduct</font>(<b>A</b>[0], <font COLOR="red">p</font>, <b>A</b>[1]);
+    3.      c2 = <font COLOR="orange">crossProduct</font>(<b>A</b>[1], <font COLOR="red">p</font>, <b>A</b>[2]);
+    4.      c3 = <font COLOR="orange">crossProduct</font>(<b>A</b>[3], <font COLOR="red">p</font>, <b>A</b>[0]);
+    5.      Return (c1*c2 >= 0 && c2*c3 >= 0 && c3*c1 >= 0)
+</code>
+</pre>
+            
+            <small>The running time is O(logn)</small>
+        </div>
+    </div>
+    <br clear="all">
+    <input type="button" onclick="myClear();" value="Clear">
+    <input type="button" id="drawFind" onclick="drawFind();" value="Draw Point To Be Found">
+    <input type="button" id="run" onclick="run();" value="Run">
+    <div id="controls"> 
+        <input type="button" class="pauseplay" id="play" onclick="play();" value="Play">
+        <input type="button" class="pauseplay" id="pause" onclick="pause();" value="Pause">
+        
+        <input type="button" class="backfor" id="backward" onclick="backward();" value=&larr;>
+        <input type="button" class="backfor" id="forward" onclick="forward();" value=&rarr;>
+        <input type="button"  id="blackOut" onclick="blackOut();" value="Black Out">
+    </div>
+    
+    <hr>
+     <small>"Black Out" colours out the region where we know the point can't be.</small>
+</body>
+</html>

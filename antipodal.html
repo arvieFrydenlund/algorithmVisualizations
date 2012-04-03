@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>List Antipodal</title>
+<script type="text/javascript" src ="antipodal.js"></script>
+<style type="text/css">
+    #alg{
+        margin-left: 10px;
+    }
+    #canvas{
+        float: left;
+        margin-right: 30px;
+    }
+    .pauseplay{
+       
+    }
+</style>
+</head>
+<body onload="start();">
+    <h1>List Antipodal Pairs Visualization</h1>
+    <hr>
+    <div>
+        <canvas id="canvas" width="600" height="600">Sorry no HTML5</canvas>
+        <div id="alg">
+            <small>A line of support to a set is a line L that touches the convex hull and all points lie on or to one side of L.  
+                Two points a and b are antipodal if they admit parallel lines of support. This is a Rotating Calipers Algorithm.</small>
+            <pre>
+            <code>
+    Input: A set <b>P</b> of <b>n</b> points in the plain
+    Output: A list of <font COLOR="green">pairs of antipodal points</font>.
+                    
+    1.  Find the convex hull of <b>P</b>, call it <b>CH</b>
+    2.  Find the points of <b>CH</b> with the lowest and highest points, let them be <font COLOR="red">p<sub>1</sub></font> and <font COLOR="red">p<sub>2</sub></font>
+    3.  Let <font COLOR="red">L<sub>1</sub></font> and <font COLOR="red">L<sub>2</sub></font> be the support lines for <font COLOR="red">p<sub>1</sub></font> and <font COLOR="red">p<sub>2</sub></font>
+    4.  Let the slope of <font COLOR="red">L<sub>1</sub></font> and <font COLOR="red">L<sub>2</sub></font> be 0
+    5.  do
+    6.     if the angle between line <font COLOR="red">p<sub>1</sub></font><font COLOR="darkviolet">p<sub>1</sub>.next()</font> and <font COLOR="red">L<sub>1</sub></font> > line <font COLOR="red">p<sub>2</sub></font><font COLOR="darkviolet">p<sub>2</sub>.next()</font> and <font COLOR="red">L<sub>2</sub></font>
+    7.        slope = slope of <font COLOR="red">p<sub>2</sub></font><font COLOR="darkviolet">p<sub>2</sub>.next()</font>
+    8.        <font COLOR="red">p<sub>2</sub></font> = <font COLOR="darkviolet">p<sub>2</sub>.next()</font>
+    9.        <font COLOR="green">Pairs.add(<font COLOR="red">p<sub>1</sub></font>, <font COLOR="red">p<sub>2</sub></font>)</font>
+    10.    else if the angle between line <font COLOR="red">p<sub>1</sub></font><font COLOR="darkviolet">p<sub>1</sub>.next()</font> and <font COLOR="red">L<sub>1</sub></font> < line <font COLOR="red">p<sub>2</sub></font><font COLOR="darkviolet">p<sub>2</sub>.next()</font> and <font COLOR="red">L<sub>2</sub></font>
+    11.       slope = slope of <font COLOR="red">p<sub>1</sub></font><font COLOR="darkviolet">p<sub>1</sub>.next()</font>
+    12.       <font COLOR="red">p<sub>1</sub></font> = <font COLOR="darkviolet">p<sub>1</sub>.next()</font>
+    13.       <font COLOR="green">Pairs.add(<font COLOR="red">p<sub>1</sub></font>, <font COLOR="red">p<sub>2</sub></font>)</font>
+    14.    else                                 //special case: parallel lines
+    15.       slope = slope of <font COLOR="red">p<sub>1</sub></font><font COLOR="darkviolet">p<sub>1</sub>.next()</font>
+    16.       <font COLOR="green">Pairs.add(<font COLOR="red">p<sub>1</sub></font>, <font COLOR="darkviolet">p<sub>2</sub>.next()</font>)</font>
+    17.       <font COLOR="green">Pairs.add(<font COLOR="darkviolet">p<sub>1</sub>.next()</font>, <font COLOR="red">p<sub>2</sub></font>)</font>
+    18.       <font COLOR="red">p<sub>1</sub></font> = <font COLOR="darkviolet">p<sub>1</sub>.next()</font>
+    19.       <font COLOR="red">p<sub>2</sub></font> = <font COLOR="darkviolet">p<sub>2</sub>.next()</font>
+    20.       <font COLOR="green">Pairs.add(<font COLOR="red">p<sub>1</sub></font>, <font COLOR="red">p<sub>2</sub></font>)</font>
+    21. while(<font COLOR="red">p<sub>1</sub></font> and <font COLOR="red">p<sub>2</sub></font> are different from the starting pair)   
+            </code>            
+            </pre>
+            <small>The running time is O(nlogn).</small>
+        </div>       
+    </div>
+    <br clear="all">
+    <input type="button" onclick="myClear();" value="Clear">
+    <input type="button" id="run" onclick="run();" value="Run">
+    <div id="controls"> 
+        <input type="button" class="pauseplay" id="play" onclick="play();" value="Play">
+        <input type="button" class="pauseplay" id="pause" onclick="pause();" value="Pause">
+        
+        <input type="button" class="backfor" id="backward" onclick="backward();" value=&larr;>
+        <input type="button" class="backfor" id="forward" onclick="forward();" value=&rarr;>
+    </div>
+        
+    <hr>
+    
+
+</body>
+</html>

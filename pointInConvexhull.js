@@ -1,3 +1,20 @@
+/*Code by Arvie Frydenlund, April 2nd 2012
+ *
+ *The visualization works by creating a set of frames, where each frame describes
+ *the algorithm at a given point in time.
+ *
+ *The set of frames each come in pairs, where the first shows the algorithm with out the 
+ *blackout the second shows the black out.
+ *
+ *when not in blackout mode, the vector of frames is just incremented by two elements
+ *to skip over the blackout frames.
+ *
+ *The skip was done to avoid having multiple timeouts set at one time, since the 
+ *other easy way to do this would to be only have one frame and then set a time out
+ *for the non-blackout frame and a second timeout latter on for the blackout one
+ *for every loop in the play recurance
+ */
+
 //The function called on load.
 function start(){
     //set up buttons
@@ -61,15 +78,11 @@ function start(){
             findPoint = mousePos;
             context.clearRect(0, 0, canvas.width, canvas.height);
             drawFindPoint();
-        }    
-        
-    //debug.innerHTML = points.length+" ("+points[0].x+","+points[0].y+")";		
+        }    		
     }, false);
-	
-
-
 };
 
+//resets the variables
 function myClear(){
     clearTimeout(timeOutID);
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -85,40 +98,29 @@ function myClear(){
     
     //holds the points in a vector
     points = [];
-    
     //holds the conhull points
     conHull = [];
-    
     //holds the point to be found
     findPoint = 0;
-
     //holds the frames which define what the algorithm looks like at each step
     frames = [];
     //holds the current frame
     curFrame = 0;
-    
-    time = 1500; //time step
-  
     // holds the setTimeOut ID
     timeOutID = 0;
-
     //used for when user input stops and algorithm runs.  This disables new points.
-    running = false;
-    
+    running = false; 
     //used for when in drawing the finding point state 
-    drawFinding = false;
-    
+    drawFinding = false;  
     //uses for when in black Out mode
-    isBlackOut = true;
-    
+    isBlackOut = true; 
     //determines if we are in a paused or running state
-    paused = true;
-    
+    paused = true;  
     //return value of algorithm
     returnVal = false;
 }
 
-
+//code taken from http://www.html5canvastutorials.com/advanced/html5-canvas-mouse-coordinates/
 function getMousePos(canvas, evt){
     // get canvas position
     var obj = canvas;
@@ -211,8 +213,7 @@ function convexHull(myPoints){
     
     //update list as the conhull
     var myConHull = upper.concat(lower);  //what algorithm normally returns
-    return myConHull;
-	     
+    return myConHull;	     
 }
 
 function run(){
@@ -222,17 +223,19 @@ function run(){
     arr = conHull.slice();
     returnVal = find(arr);
     
+    //draw the last frame
     curFrame = frames.length-1;
     drawCurFrame();
     curFrame = 0;
 }
 
 //this is exactly the same as the convexhull notRight function
+//semantics are slightly differnt, which may justify the rename 
 function crossProduct(p1, p2, p3){
-    return (p2.x - p1.x)*(p3.y - p1.y) - (p2.y - p1.y)*(p3.x - p1.x);
-    
+    return (p2.x - p1.x)*(p3.y - p1.y) - (p2.y - p1.y)*(p3.x - p1.x);   
 }
 
+//detrmine if point is in triangle
 function inTriangle(arr){
     var c1 = crossProduct(arr[0], findPoint, arr[1]);
     var c2 = crossProduct(arr[1], findPoint, arr[2]);
@@ -244,14 +247,17 @@ function inTriangle(arr){
     }
 }
 
+//main algorithm, see site for a more intuitive understanding
 function find(arr){
     var mid = Math.floor(arr.length/2);
-    addFrame(arr, arr[mid]);
-    if(arr.length < 3){
+    
+    addFrame(arr, arr[mid]); //add in the new frame
+    
+    if(arr.length < 3){  //should never happen
         return false;
     }
     
-    if(arr.length == 3){
+    if(arr.length == 3){ //basecase
         return inTriangle(arr);
     }
     var newArr = [];
@@ -260,19 +266,13 @@ function find(arr){
     if(cp == 0){ //coliner so point is on line
         return true;
     }else if(cp < 0){
-        //alert("db0");
         newArr = arr.slice(mid, arr.length-1);
-        //alert("db01");
         newArr.push(arr[arr.length-1]);
-        //alert("db02");
         newArr.unshift(arr[0]);
-        //alert("db03");
         return find(newArr);
     }else{
-        //alert("db1");
         newArr = arr.slice(0, mid);
         newArr.push(arr[mid]);
-        //alert("db2");
         return find(newArr);
     } 
 }
@@ -283,7 +283,7 @@ function addFrame(arr, mid){
     var f = new Frame(arr, mid);
     frames.push(f);
     
-    var f = new Frame(arr, mid);
+    var f = new Frame(arr, mid);  //same as first, but black will be drawn
     frames.push(f);
 }
 
@@ -302,12 +302,14 @@ function Frame(nArr, nMid){
     this.polyArr.push(P);
 }
 
+//switches blackout mode
 function blackOut(){
     if(curFrame % 2 == 1)
         curFrame = curFrame-1;
     isBlackOut = !isBlackOut;
 }
 
+//control buttons
 function pause(){
     clearTimeout(timeOutID);
     paused = true;
@@ -333,13 +335,11 @@ function reset(){
     curFrame = 0;   
 }
 
-
-function playRun(){
-    
+//recurence funtion for the animation
+function playRun(){   
     if(curFrame < frames.length && paused == false){
         drawCurFrame();
-        timeOutID = setTimeout(playRun, time);
-        
+        timeOutID = setTimeout(playRun, time);   
     }
 }
 
@@ -373,8 +373,8 @@ function backward(){
 function drawCurFrame(){
     context.clearRect(0, 0, canvas.width, canvas.height);
     
-    //alert("curframe: "+curFrame+", length "+frames.length);
-    
+
+    //steps over blackout frames
     if(!isBlackOut){
         curFrame = curFrame+1;
     }
@@ -419,6 +419,7 @@ function drawCurFrame(){
     
     drawFindPoint();
     
+    //handles drawing the last frame which says "true" or "false"
     if(curFrame >= frames.length-2){
         drawReturnVal()
         
@@ -471,6 +472,7 @@ function drawCurFrame(){
     curFrame = curFrame+1;
 }
 
+//draws "true" or "false" on the last frame
 function drawReturnVal(){
     context.strokeStyle = "rgb(200,0,0)";  
     context.font = '18pt Calibri';
@@ -479,14 +481,15 @@ function drawReturnVal(){
     context.strokeStyle = "rgb(0,0,0)";  
 }
 
-
+//this switches to the mode where the user should be drawing the point
+//"drawFind" is a horrible names since it could be confused with the other draw functions
 function drawFind(){
-    if(points.length < 3){
+    if(points.length < 3){  //safety case
         context.clearRect(0, 0, canvas.width, canvas.height);
         context.font = '18pt Calibri';
         context.fillStyle = 'black';
         context.fillText("Need 3 or more points for the algorithm to be intresting!", 10, 25);
-        return; //do something here
+        return;
     }
     
     
@@ -500,7 +503,6 @@ function drawFind(){
 
 
 function drawConHull(vec){
-    
     context.strokeStyle = "rgb(0,0,0)";  
     context.beginPath();
     context.moveTo(vec[0].x, vec[0].y);
@@ -518,6 +520,7 @@ function drawConHull(vec){
     }
 }
 
+//draws the labels for the order of points on the conhull
 function drawLabels(vec){
     context.strokeStyle = "rgb(0,200,0)";  
     context.font = '18pt Calibri';
@@ -527,6 +530,7 @@ function drawLabels(vec){
     context.strokeStyle = "rgb(0,0,0)";  
 }
 
+//draws the point to be found
 function drawFindPoint(){
     drawConHull(conHull);
     drawLabels(conHull);
@@ -537,6 +541,8 @@ function drawFindPoint(){
     context.fillStyle = "rgb(0,0,0)";
 }
 
+//finds the centroid of the points on the conhull
+//this is where the return value message will be written
 function centroid(){
     var xc = 0;
     var yc = 0;
@@ -552,7 +558,12 @@ function centroid(){
     };
 }
 
-
+//this extends the mid line to the ends of the canvas
+//this is how the blackout polygon is determined
+//just figures out the line equation and sees which sides of the canvas
+//that line intersects, and where it intersects
+//then it finds the the corner points on the canvas which are on the
+//wrong side of the mide line.  This makes a polygon
 function extendLine(p1, p2){
     //y = mx+b
     var m = (p2.y-p1.y)/(p2.x-p1.x);
@@ -580,7 +591,7 @@ function extendLine(p1, p2){
         P.push({x:newB, y:canvas.height});
     }
     
-    
+    //finds corner points on wrong side of midline
     var cp = crossProduct(p1, findPoint, p2);
     var corners = [];
     corners.push({x:0, y:0});
@@ -600,5 +611,5 @@ function extendLine(p1, p2){
         }
     }
     
-    return convexHull(P);
+    return convexHull(P); //reorders points so that I can draw lines and fill in the shape
 }

@@ -1,3 +1,16 @@
+/*Code by Arvie Frydenlund, April 2nd 2012
+ *
+ *The visualization two sets of frames.
+ *The frames are like a snapshot of the algorithm at a given step.
+ *the first set moves the slope lines in large increments, like how the real
+ *algorithm would run.  The second set has the slope incrementing at about 1 
+ *degree per frame.
+ *when in pause mode the first set is used and when in play mode the second set 
+ *is used.
+ */
+
+
+
 //The function called on load.
 function start(){
     //set up buttons
@@ -103,7 +116,7 @@ function tooCloseToEdge(mousePos){
     return true;   
 }
 
-//gets the mouse positions
+//code taken from http://www.html5canvastutorials.com/advanced/html5-canvas-mouse-coordinates/
 function getMousePos(canvas, evt){
     // get canvas position
     var obj = canvas;
@@ -125,14 +138,23 @@ function getMousePos(canvas, evt){
 }
 
 function run(){
+    if(points.length < 3){
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.font = '18pt Calibri';
+        context.fillStyle = 'black';
+        context.fillText("Need 3 or more points for the algorithm to be intresting!", 10, 25);
+        return;
+    }
+    
     document.getElementById("controls").style.display = "inline";
     document.getElementById("run").style.display = "none";
     document.getElementById("backward").style.display = "inline";
     document.getElementById("forward").style.display = "inline";
     running = true;
-    antipodals();
-    extendFrames();
+    antipodals(); //runs main algorithm, creates first set of frames
+    extendFrames(); //creates second set of frames
     
+    //draw out the last frame
     curFrame = frames.length-1;
     drawCurFrame();
     curFrame = 0;  
@@ -241,7 +263,7 @@ function getAngle(p1, p2, p3){
     var aa1 = Math.sqrt(a.x*a.x + a.y*a.y); //vector lengths
     var ab2 = Math.sqrt(b.x*b.x + b.y*b.y);
  
-    //bad things happen check
+    //will return NAN and algorithm breaks, safety check.
     if(isNaN(Math.acos(dp/(aa1*ab2)))){
         alert("dp "+dp+" ab2 "+ab2);
         alert("angle "+dp/(aa1*ab2)+",  "+Math.acos(dp/(aa1*ab2)));
@@ -289,6 +311,7 @@ function antipodals(){
             slope = 10000000.0;
         }   
         
+        //gets point on the slope line
         var p1N = getNext(p1);     
         var l1b = conHull[p1].y - (slope*conHull[p1].x);
         var l10 = {
@@ -306,15 +329,17 @@ function antipodals(){
         };
         var l2 = getPointOnLine(conHull[p2], l20, conHull[p2N]);
 
-        
+        //gets the two angles
         var l1Angle = getAngle(conHull[p1], l1, conHull[p1N]); 
         var l2Angle = getAngle(conHull[p2], l2, conHull[p2N]); 
         
+        //if the point on the slope line was on the wrong side of the line, need to take Supplementary angle
         if(crossProduct(conHull[p1], l1, conHull[p1N]) < 0)
             l1Angle = Math.acos(-1)-l1Angle;
         if(crossProduct(conHull[p2], l2, conHull[p2N]) < 0)
             l2Angle = Math.acos(-1)-l2Angle;
         
+        //adds in the frame
         var supLine1 = new Pair(l1, conHull[p1]);
         var supLine2 = new Pair(l2, conHull[p2]);
         addFrame(p1, p2, supLine1, supLine2, l1Angle, l2Angle, slope)
@@ -422,7 +447,7 @@ function addFrameEx(p1, p2, supLine1, supLine2, l1Angle, l2Angle, slope, pairs){
 
 //A fame object.  It describes what the algorithm looks like at a given step.
 function Frame(p1N, p2N, supLine1N, supLine2N, l1Angle, l2Angle, slopeN, pairsN){
-    //the new anitpodal pair
+    //the new anitpodal pair, indexes into conHull not point objects
     this.antiP = {
         p1: p1N,
         p2: p2N
@@ -450,12 +475,15 @@ function extendFrames(){
         
         var pairs = f1.pairs;
 
+        //re-determine which was the smalles angle
         var slopeAngle1 = f1.a1;
         if(f1.a1 > f1.a2)
             slopeAngle1 = f1.a2;
          
+        //find size of that angle 
         var angle = Math.floor(Math.abs(slopeAngle1*(180/Math.PI)));
 
+        //add in a frame for every 1 degree increment of slope
         for(var j = 1; j < angle; j++){
             var temp = Math.atan(f1.slope)*(180/Math.PI)+j;
  
@@ -495,11 +523,12 @@ function extendFrames(){
         }
         
     }
-    //alert(framesEx.length)
+    //add in the last frame
     frames[frames.length-1].idxEx = framesEx.length;
     framesEx.push(frames[frames.length-1]);
 }
 
+//controls
 function play(){
     lastForward = false;
     paused = false;
@@ -520,6 +549,7 @@ function pause(){
     document.getElementById("forward").style.display = "inline";
 }
 
+//recurence function for running the animation
 function playRun(){
     drawCurFrame();
     if(curFrameEx < framesEx.length && curFrameEx != 0){
@@ -577,6 +607,7 @@ function reset(){
 function drawCurFrame(){
     context.clearRect(0, 0, canvas.width, canvas.height);
     
+    //decides which set of frames to draw from
     if(paused == true){
         var f = frames[curFrame];
     }else{
@@ -589,6 +620,7 @@ function drawCurFrame(){
     drawAntipodals(f.pairs);
     drawPoints();
     
+    //draw the "next points"
     var p1N = getNext(f.antiP.p1);
     var p2N = getNext(f.antiP.p2);
     context.fillStyle = "darkviolet";  
@@ -604,12 +636,9 @@ function drawCurFrame(){
     drawSupLine(f.supLine1.p1, f.supLine1.p2);
     drawSupLine(f.supLine2.p1, f.supLine2.p2);
     
-    
-    
-    
+    //reset if at the end of the 
     if(curFrame == frames.length && paused == true)
-        reset();
-    
+        reset();   
     if(curFrameEx == framesEx.length && paused == false)
         reset();
     
@@ -636,19 +665,15 @@ function drawSupLine(p1, p2){
 function drawAntipodals(CurApPairs){
     context.strokeStyle = "rgb(0,200,0)";  
     context.beginPath();
-    //alert("DB1 "+apPairs.length);
     for(var i = 0; i < CurApPairs.length; i++){
         context.moveTo(conHull[CurApPairs[i].p1].x, conHull[CurApPairs[i].p1].y);
         context.lineTo(conHull[CurApPairs[i].p2].x, conHull[CurApPairs[i].p2].y); 
-        //alert(apPairs[i].p1.x+" "+apPairs[i].p1.y+" "+apPairs[i].p2.x+" "+apPairs[i].p2.y);
         context.stroke();
     }  
     context.strokeStyle = "rgb(0,0,0)";  
-    //alert("DB2");
 }
 
 function  drawPoints(){
-	 
     context.fillStyle = "rgb(0,0,0)";
     for(var i = 0; i < conHull.length; i++){
         context.beginPath(); 
@@ -659,7 +684,6 @@ function  drawPoints(){
 
 
 function drawConHull(vec){
-    
     context.strokeStyle = "rgb(0,0,0)";  
     context.beginPath();
     context.moveTo(vec[0].x, vec[0].y);
@@ -677,6 +701,9 @@ function drawConHull(vec){
     }
 }
 
+//this extends the slope lines out to the sides of the canvas element
+//just figures out the line equation and sees which sides of the canvas
+//that line intersects, and where it intersects
 function extendLine(p1, p2){
     //y = mx+b
     var m = (p2.y-p1.y)/(p2.x-p1.x);
